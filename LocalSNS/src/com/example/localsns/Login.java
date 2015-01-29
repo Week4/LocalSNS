@@ -16,11 +16,13 @@ import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -30,28 +32,45 @@ public class Login extends Activity {
 	EditText id,password;
 	Button login,signup;
 	String id_text, pw_text;
-//	saveCookie pref = new saveCookie(this);
+	
+	//ID 저장을 위한 shared preference
+	SharedPreferences pref;
+	SharedPreferences.Editor editor;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //타이틀바 없애기 (setcontentview 전에 불러줘야함)
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        
         setContentView(R.layout.login);
+        
         
         id = (EditText) findViewById(R.id.id);
         password = (EditText) findViewById(R.id.password);
         login = (Button) findViewById(R.id.login);
         signup = (Button) findViewById(R.id.signup);
         
+    	pref = getSharedPreferences("pref", MODE_PRIVATE);
+    	editor = pref.edit();
+    	
+    	//이미 로그인 한적이 있으면 shared reference에서 ID 불러오기
+        if(pref.getString("ID", null) != null)
+        	id.setText(pref.getString("ID",""));
+        
+       //로그인 버튼
         login.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				id_text = id.getText().toString();
 				pw_text = password.getText().toString();
+				//http post를 요청하기위해 asynctask 를 불러온다
 				new ProcessLoginTask().execute(null, null, null);
 			}
 		});
         
+        //회원가입 버튼
         signup.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -94,11 +113,15 @@ public class Login extends Activity {
 			Log.e("responsebody"," " + responseBody);
 			
 			if (responseBody.equals("none")) {
-				Toast.makeText(getApplicationContext(), "Wrong Credentials", Toast.LENGTH_SHORT).show();
-				//Intent myIntent = new Intent(getApplicationContext(),Category.class);
-				//startActivity(myIntent);
-			} else
-				Toast.makeText(getApplicationContext(), "Hello, " + responseBody, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "아이디나 비밀번호가 잘못됬습니다.", Toast.LENGTH_SHORT).show();
+			} else{
+				Toast.makeText(getApplicationContext(), "안녕하세요, " + responseBody, Toast.LENGTH_SHORT).show();
+				//shared reference에서 아이디 저장
+				editor.putString("ID", responseBody);
+				editor.commit();
+				Intent main = new Intent(getApplicationContext(), Main.class);
+				startActivity(main);
+			}
 		}
 	}
         

@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,6 +34,8 @@ public class Signup extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //타이틀바 없애기 (setcontentview 전에 불러줘야함)
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.signup);
         
         new_id = (EditText) findViewById(R.id.new_id);
@@ -84,11 +87,11 @@ public class Signup extends Activity {
 			Log.e("responsebody"," " + responseBody);
 
 			if (responseBody.equals("already_exists")) {
-				Toast.makeText(getApplicationContext(), "Already Exists", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "이미 존재하는 아이디입니다", Toast.LENGTH_SHORT).show();
 				//Intent myIntent = new Intent(getApplicationContext(),Category.class);
 				//startActivity(myIntent);
 			} else
-				Toast.makeText(getApplicationContext(), "Hello, " + responseBody, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "환영합니다, " + responseBody, Toast.LENGTH_SHORT).show();
 		}
 	}
     
